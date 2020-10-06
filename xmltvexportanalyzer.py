@@ -8,9 +8,9 @@ def main(argv):
     channelId = ''
     channelIds = []
     separation = ''
-    lang = 'fi' # defaults to finnish
+    lang = ''
     try:
-        opts, args = getopt.getopt(argv, "lhc:i:s:", ["ifile=", "channelid=","separation="])
+        opts, args = getopt.getopt(argv, "hc:i:s:l:", ["ifile=", "channelid=","separation="])
     except getopt.GetoptError:
         print('XMLTVExportParser.py -i <inputFile> -c <channelId> -s <max separation seconds>')
         sys.exit(2)
@@ -18,7 +18,7 @@ def main(argv):
         if opt == '-h':
             print('XMLTVExportParser.py -i <inputFile> -c <channelId> -s <max separation seconds>')
             sys.exit()
-        if opt == '-l':
+        if opt in '-l':
             lang = arg
         elif opt in ("-i", "--ifile", "--inputfile", "--inputFile"):
             inputFile = arg
@@ -33,7 +33,11 @@ def main(argv):
     print("inputFile:", inputFile)
     print("channelId:", channelId)
     print("separation:", separation)
+    print("lang:", lang)
     print("--- start analyzing ---")
+
+    if lang == '':
+        lang = 'fi' # defaults to fi
 
     # parse xml root and get programmes for selected channel, and sort to make sure those are in correct order
     xmlRoot = ET.parse(inputFile).getroot()
