@@ -2,7 +2,7 @@
 Simple python script, which analyzes xmltvexport if there is channels with too much empty time without program
 
 # usage
-xmltvexportanalyzer.py -i <inputFile> -c <channelId> -s <max separation seconds>
+xmltvexportanalyzer.py -i <inputFile> -c <channelId> -s <max separation seconds> -l <lang defaults to fi> -h
 
 # example
 ```bash
