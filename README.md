@@ -6,7 +6,7 @@ xmltvexportanalyzer.py -i <inputFile> -c <channelId> -s <max separation seconds>
 
 # example
 ```bash
->>> xmltvexportanalyzer> python xmltvexportanalyzer.py -i xmltvexport.xml -s 5 -c 17
+>>> python xmltvexportanalyzer.py -i xmltvexport.xml -s 5 -c 17
 ---    arguments    ---
 inputFile: xmltvexport.xml
 channelId: 17
