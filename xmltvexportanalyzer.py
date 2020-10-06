@@ -8,8 +8,9 @@ def main(argv):
     channelId = ''
     channelIds = []
     separation = ''
+    lang = 'fi' # defaults to finnish
     try:
-        opts, args = getopt.getopt(argv, "hc:i:s:", ["ifile=", "channelid=","separation="])
+        opts, args = getopt.getopt(argv, "lhc:i:s:", ["ifile=", "channelid=","separation="])
     except getopt.GetoptError:
         print('XMLTVExportParser.py -i <inputFile> -c <channelId> -s <max separation seconds>')
         sys.exit(2)
@@ -17,6 +18,8 @@ def main(argv):
         if opt == '-h':
             print('XMLTVExportParser.py -i <inputFile> -c <channelId> -s <max separation seconds>')
             sys.exit()
+        if opt == '-l':
+            lang = arg
         elif opt in ("-i", "--ifile", "--inputfile", "--inputFile"):
             inputFile = arg
         elif opt in ("-c", "--channelId", "--channelId"):
@@ -41,10 +44,9 @@ def main(argv):
         channelIds.append(channelId)
 
     for channelIdToAnalyze in channelIds:
-        analyzeChannelId(xmlRoot, channelIdToAnalyze, separation)
+        analyzeChannelId(xmlRoot, channelIdToAnalyze, separation, lang)
 
-def analyzeChannelId(xmlRoot, channelId, separation):
-    # print("channelId:", channelId, "being analyzed")
+def analyzeChannelId(xmlRoot, channelId, separation, lang):
     programmes = xmlRoot.findall("programme[@channel='%s']" % channelId)
     startTimes = []
     for program in programmes:
@@ -59,7 +61,8 @@ def analyzeChannelId(xmlRoot, channelId, separation):
         try:
             currentStart = datetime.datetime.strptime(j.attrib['start'], '%Y%m%d%H%M%S')
             currentStop = datetime.datetime.strptime(j.attrib['stop'], '%Y%m%d%H%M%S')
-            currentTitle = (j.find("title"), j.find("title[@lang='fi']"))[j.find("title[@lang='fi']") != None].text
+            currentTitle = (j.find("title"), j.find("title[@lang='%s']" % lang))[
+                j.find("title[@lang='%s']" % lang) is not None].text
         except AttributeError:
             print("channelId:", channelId, 'Current analyzed program missing necessary information:', ET.tostring(j))
             continue
@@ -67,17 +70,18 @@ def analyzeChannelId(xmlRoot, channelId, separation):
             next = programmes[i+1]
             nextStart = datetime.datetime.strptime(next.attrib['start'], '%Y%m%d%H%M%S')
             nextStop = datetime.datetime.strptime(next.attrib['stop'], '%Y%m%d%H%M%S')
-            nextTitle = (next.find("title"), next.find("title[@lang='fi']"))[next.find("title[@lang='fi']") != None].text
+            nextTitle = (next.find("title"), next.find("title[@lang='%s']" % lang))[
+                next.find("title[@lang='%s']" % lang) is not None].text
         except AttributeError:
             print("channelId:", channelId, 'Next analyzed program missing necessary information:', ET.tostring(next))
             continue
 
         currentMaxStop = currentStop + datetime.timedelta(0, separation)
         if currentMaxStop < nextStart:
-            print('channelId:', channelId, 'Programs', currentTitle, '[', currentStart,'-',currentStop,'] and',nextTitle,'[',nextStart,'-',nextStop,'] have too large separation (', nextStart - currentStop, ')')
-
-    print("channelId:", channelId, "analyzed")
-
+            print('channelId:', channelId,
+                  '| separation:', nextStart - currentStop,
+                  '| Program:', currentTitle,'(',currentStart,'-',currentStop,')',
+                  '| Next program:', nextTitle,'(',nextStart,'-',nextStop,')')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
